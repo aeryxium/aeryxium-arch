@@ -1,0 +1,160 @@
+#!/bin/bash
+
+# Set variables
+__set-sdboot-variables() {
+	backupdir="/usr/share/aeryxium/sdboot"
+	if [[ -d "${backupdir}" ]]; then
+		backupdir="${backupdir}-$(date +%+4Y%m%d%H%M%S)"
+	fi
+	readonly backupdir
+	local -r efiguid="c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
+	local -r xblguid="bc13c2ff-59e6-4262-a352-b275fd6f7172"
+
+	# Find EFI and XBOOTLDR if it exists
+	local -r efi="$(lsblk -nlpo NAME,PARTTYPE,MOUNTPOINT | grep ${efiguid} | tr -s ' ' | cut -d' ' -f3)"
+	local -r xbl="$(lsblk -nlpo NAME,PARTTYPE,MOUNTPOINT | grep ${xblguid} | tr -s ' ' | cut -d' ' -f3)"
+	boot="${efi}"
+	if [[ -n "${xbl:-}" ]]; then
+		boot="${xbl}"
+	fi
+	readonly boot
+	# If there's no boot directory, we can't proceed
+	if [[ -z "${boot:-}" ]]; then
+		printf "ERROR: Unable to locate boot or EFI directory.\n"
+		return 1
+	fi
+
+	# Set other vriables
+	readonly loader="${efi}/loader/loader.conf"
+	readonly entries="${boot}/loader/entries"
+
+	# Create directories if they don't exist
+	mkdir -p "${efi}/loader"
+	mkdir -p "${entries}"
+}
+
+# Update mkinitcpio configuration as required
+__update-mkinitcpio() {
+	if [[ ! -f '/etc/mkinitcpio.conf' ]]; then
+		printf "ERROR: mkinitcpio missing.\n"
+		return 1
+	fi
+	local hooks_string="HOOKS=(base udev"
+	# Use plymouth if installed
+	if pacman -Qq plymouth &>/dev/null; then
+		hooks_string+=" plymouth"
+	fi
+	hooks_string+=" autodetect keyboard keymap consolefont modconf block"
+	if [[ "${is_encrypted:-}" = "true" ]]; then
+		if pacman -Qq yubikey-full-disk-encryption &>/dev/null; then
+			hooks_string+=" ykfde"
+			if ! grep -q 'YKFDE_CHALLENGE_PASSWORD_NEEDED="1"' /etc/ykfde.conf; then
+				printf "WARN: ykfde may not be properly confiured.\n"
+			fi
+		else
+			hooks_string+=" encrypt"
+		fi
+	fi
+	hooks_string+=" filesystems keyboard fsck)"
+
+	printf "%s\n" "$hooks_string"
+	sed -i "s/^HOOKS=(.*)$/$hooks_string/" /etc/mkinitcpio.conf
+}
+
+# Write configurations to entry files
+__write-entries() {
+	local entrynum=10
+	for kernel in "${kernels[@]}"; do
+		local kfile="$(basename "${kernel}")"
+		# If hardened is installed, make it the default
+		if [[ "${kfile}" = "vmlinuz-linux-hardened" ]]; then
+			local old_entrynum="${entrynum}"
+			entrynum=05
+		fi
+		# If LTS is installed, make it the last entry
+		if [[ "${kfile}" = "vmlinuz-linux-lts" ]]; then
+			local old_entrynum="${entrynum}"
+			entrynum=95
+		fi
+		local kname="$(echo "${kfile}" | cut -d'-' -f3-)"
+		local ktitle="$(echo "${kname:-mainstream}" | tr '-' ' ')"
+		local title_string="Arch Linux // ${ktitle^^}"
+		local fname="${entries}/${entrynum}-arch-${kname:-mainstream}.conf"
+		printf "title   %s\n" "${title_string}"        > "${fname}"
+		printf "linux   /%s\n" "${kfile}"             >> "${fname}"
+		for ucode in "${ucodes[@]}"; do
+			local ufile="$(basename "${ucode}")"
+			printf "initrd  /%s\n" "${ufile}"     >> "${fname}"
+		done
+		local initramfs="initramfs-linux${kname:+-$kname}.img"
+		if [[ -f "${boot}/${initramfs}" ]]; then
+			printf "initrd  /%s\n" "${initramfs}" >> "${fname}"
+		fi
+		printf "%s\n" "${options_string}"             >> "${fname}"
+		entrynum=$(( entrynum + 10 ))
+		if [[ -n "${old_entrynum:-}" ]]; then
+			entrynum="${old_entrynum}"
+			unset old_entrynum
+		fi
+	done
+}
+
+# Backup and deleting any existing entries, then create new ones
+__make-sdboot-entries() {
+	# Backup existing bootloader configs if any exist
+	local old_entries=( "${entries}"/*.conf )
+#	if (( ${#old_entries[@]} > 0 )); then
+#		for entry in "${old_entries[@]}"; do
+#			install -Dm 0644 "$entry" "${backupdir}/entries/$(basename "${entry}")"
+#			rm -f "${entry}"
+#		done
+#	fi
+
+	# Get list of ucode images and kernels
+	local ucodes=( "${boot}"/*-ucode.img )
+	local kernels=( "${boot}"/vmlinuz-linux* )
+
+	# Set root device info for options
+	local root_source="$(df / --output=source | tail -n1)"
+	local root_uuid="$(blkid "${root_source}" | sed -n 's/.* UUID=\"\([^\"]*\)\".*/\1/p')"
+	local root_string="root=UUID=${root_uuid}"
+
+	# Set encrypted root device info for options and configure mkinitcpio if applicable
+	if [[ "$(lsblk "${root_source}" -lnpo TYPE)" == "crypt" ]]; then
+		local root_name="${root_source##*/}"
+		local root_dev="$(lsblk -lspno NAME "${root_source}" | sed -n 2p)"
+		root_uuid="$(blkid "${root_dev}" | sed -n 's/.* UUID=\"\([^\"]*\)\".*/\1/p')"
+		root_string="cryptdevice=UUID=${root_uuid}:${root_name} root=${root_source}"
+		local is_encrypted="true"
+	fi
+
+	# Set subvolume root device info for options if applicable
+	if [[ "$(stat --format=%i /)" == "256" ]] &&
+			[[ "$(stat -f --format=%T /)" == "btrfs" ]]; then
+		local subvol="$(findmnt -ano SOURCE / | sed 's/.*\[\/\([^]]\)\].*/\1/')"
+		root_string+=" rootflags=subvol=${subvol}"
+	fi
+
+	# Set boot options; additional options may be passed as a parameter
+	local options_string="options ${root_string} rw quiet loglevel=3 udev.log_priority=3${@:+ $@}"
+
+	__update-mkinitcpio
+	__write-entries
+}
+
+# Configure loader to use first entry that exists
+__make-sdboot-loader() {
+	local -r entry=( "${entries}"/* )
+	local -r def_entry="$(basename "${entry[0]}")"
+	printf "default      %s\n" "${def_entry}"  > "${loader}"
+	printf "console-mode max\n"               >> "${loader}"
+	printf "editor       no\n"                >> "${loader}"
+}
+
+# Execution starts here
+if ! __set-sdboot-variables; then
+	return 1
+fi
+/usr/bin/bootctl update
+__make-sdboot-entries "$@" # Any passed arguments will be used as extra entry options
+__make-sdboot-loader

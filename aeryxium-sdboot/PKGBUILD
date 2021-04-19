@@ -1,0 +1,33 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgname='aeryxium-sdboot'
+pkgver=1
+pkgrel=1
+pkgdesc="Systemd-boot configuration and installation for Aeryxium installations."
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+backup=(
+	# -- Scripts
+	"usr/bin/update-sdboot"
+
+	# -- Configs
+	"usr/share/libalpm/hooks/systemd-boot.hook"
+)
+install="${pkgname}.install"
+source=(
+	# -- Scripts
+	"update-sdboot"
+
+	# -- Configs
+	"systemd-boot.hook"
+)
+sha256sums=('7ee01938c2ce5f510d61adb3673315e4c91b19c5285fa4b22cb03f02d295f4cc'
+            '08ed6b62dbbe67ddbe79384c5bdb0a3e539d0fe50e8d945f7cf5ec3a5c502ea9')
+
+package() {
+	# -- Scripts
+	install -Dm 0755 "update-sdboot"     "$pkgdir/usr/bin/update-sdboot"
+
+	# -- Configs
+	install -Dm 0644 "systemd-boot.hook" "$pkgdir/usr/share/libalpm/hooks/systemd-boot.hook"
+}

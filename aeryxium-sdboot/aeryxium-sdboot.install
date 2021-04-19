@@ -1,0 +1,45 @@
+#!/hint/bash
+
+# Called on first install only
+post_install() {
+	# Install binaries if they aren't already
+	if ! /usr/bin/bootctl is-installed>/dev/null; then
+		__aeryxium_sdboot-install-binary
+	fi
+
+	# Generate bootloader entries and loader config
+	/usr/bin/update-sdboot
+}
+
+# Install systemd binaries in ESP
+__aeryxium_sdboot-install-binary() {
+	# Find EFI and XBOOTLDR if it exists
+	local -r efiguid="c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
+	local -r xblguid="bc13c2ff-59e6-4262-a352-b275fd6f7172"
+	local -r efi="$(lsblk -nlpo NAME,PARTTYPE,MOUNTPOINT | grep ${efiguid} | tr -s ' ' | cut -d' ' -f3)"
+	local -r xbl="$(lsblk -nlpo NAME,PARTTYPE,MOUNTPOINT | grep ${xblguid} | tr -s ' ' | cut -d' ' -f3)"
+	local -r boot="${efi}"
+	if [[ -n "${xbl:-}" ]]; then
+		boot="${xbl}"
+	fi
+
+	# If there's no boot directory, we can't proceed
+	if [[ -z "${boot:-}" ]]; then
+		printf "ERROR: Unable to locate boot or EFI directory.\n"
+		return 1
+	fi
+
+	# Install systemd-boot binaries to ESP
+	if [[ -n "${xbl:-}" ]]; then
+		if ! /usr/bin/bootctl --esp-path="${efi}" --boot-path="${xbl}" install --no-variables; then
+			printf "An error occureed installed systemd-boot binaries.\n"
+			return 1
+		fi
+	else
+		if ! /usr/bin/bootctl install --no-variabes; then
+			printf "An error occureed installed systemd-boot binaries.\n"
+			return 1
+		fi
+	fi
+	printf "Systemd-boot binaries installed to ESP.\n"
+}

@@ -1,0 +1,16 @@
+# /usr/share/libalpm/hooks/systemd-boot.hook
+#
+# Updates systemd-boot bootloader
+
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = systemd
+Target = linux*
+
+[Action]
+Description = Updating systemd-boot entries
+When = PostTransaction
+Exec = /usr/bin/update-sdboot
