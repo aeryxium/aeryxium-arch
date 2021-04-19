@@ -1,0 +1,149 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgbase='aeryxium-pkg'
+pkgname=(
+	'aeryxium-pkg1'
+	'aeryxium-pkg2'
+)
+pkgver=1
+pkgrel=1
+pkgdesc="Aeryxium installation"
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+depends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+)
+makedepends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+)
+optdepends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+)
+provides=()
+conflicts=()
+replaces=()
+backup=(
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+)
+install="${pkgbase}.install"
+source=(
+	# ---- aeryxium-pkg1
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+
+	# ---- aeryxium-pkg2
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+)
+sha256sums=('4f6f8b9fcd8c95e390c322da1d38b56b31d9203cc9b63939351e35b33b506f76'
+            'e95ed59c213a253c3fd49552b1aa585640d5228d09d3dc4fbf29a117155ccdf2')
+
+package_aeryxium-pkg1() {
+	pkgdesc="Aeryxium install"
+	depends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+	)
+	optdepends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+	)
+	provides=()
+	conflicts=()
+	replaces=()
+	backup=(
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+	)
+	install="${pkgname}.install"
+
+	# -- Directories
+
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+}
+
+package_aeryxiun-pkg2() {
+	pkgdesc="Aeryxium install"
+	depends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+	)
+	optdepends=(
+	# -- Aeryxium Packages
+
+	# -- Official Packages
+
+	# -- AUR Packages
+	)
+	provides=()
+	conflicts=()
+	replaces=()
+	backup=(
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+	)
+	install="${pkgname}.install"
+
+	# -- Directories
+
+	# -- Scripts
+
+	# -- Configs
+
+	# -- Units
+
+	# -- Misc
+}
