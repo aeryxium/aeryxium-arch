@@ -1,0 +1,69 @@
+#!/hint/bash
+
+# Variable defintions
+__aeryxium_yubikey-variables() {
+	readonly confdir="/usr/share/aeryxium/yubikey"
+	readonly configs=(
+		"/etc/pam.d/sudo"
+		"/etc/pam.d/system-local-login"
+		"/etc/ykfde.conf"
+	)
+}
+
+# Called on first install only
+post_install() {
+	# Backup default configuration files and install custom versions
+	__aeryxium_yubikey-configs
+
+	# Update MOTD
+	cat "${confdir}/motd" >> /etc/motd
+}
+
+# Called on every upgrade
+post_upgrade() {
+	# Define variables
+	__aeryxium_yubikey-configs
+
+	# Check for updates to config files
+	for config in "${configs[@]}"; do
+		if diff -q "${confdir}/${config##*/}" "${config}" >/dev/null; then
+			cp "${confdir}/${config##*/}" "${config}.pacnew"
+		fi
+	done
+}
+
+# Install config files
+__aeryxium_yubikey-configs() {
+	__aeryxium_yubikey-variables
+
+	# Verify variables are correct
+	if [[ ! -d "${confdir:-}" ]] || (( ${#configs[@]} < 1 )); then
+		printf "ERROR: Configuration directory not configured.\n" >&2
+		return 1
+	fi
+
+	# Executed on first install
+	if [[ "${FUNCNAME[1]}" == "post_install" ]]; then
+		for config in "${configs[@]}"; do
+			if [[ ! -f "${config}" ]] ||
+					[[ ! -f "${confdir}/${config##*/}" ]]; then
+				printf "ERROR: Configuration for '%s' is incorrect.\n" \
+					"${config}" >&2
+				continue
+			fi
+			install -Dm 0644 "${config}" "${confdir}/backup/${config##*/}"
+			install -Dm 0644 "${confdir}/${config##*/}" "${config}"
+		done
+		if [[ -f "${confdir}/motd" ]]; then
+			cat "${confdir}/motd" >> /etc/motd
+		fi
+		return 0
+	fi
+
+	# Executed if not first install
+	for config in "${configs[@]}"; do
+		if diff -q "${confdir}/${config##*/}" "${config}" >/dev/null; then
+			cp "${confdir}/${config##*/}" "${config}.pacnew"
+		fi
+	done
+}

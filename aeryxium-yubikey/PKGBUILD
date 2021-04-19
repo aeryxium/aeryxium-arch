@@ -1,0 +1,45 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgname='aeryxium-yubikey'
+pkgver=1
+pkgrel=1
+pkgdesc="Yubikey packages for Aeryxium installations"
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+depends=(
+	# -- Official Packages
+	'yubico-pam'
+	'yubikey-full-disk-encryption'
+	'yubikey-manager'
+	'yubikey-personalization'
+)
+backup=(
+	# -- Configs
+	"lib/udev/rules.d/91-yubikey.rules"
+)
+install="${pkgname}.install"
+source=(
+	# -- Configs
+	"pam.sudo"
+	"pam.system-local-login"
+	"udev.yubikey.rules"
+	"ykfde.conf"
+
+	# -- Misc
+	"yubikey.motd"
+)
+sha256sums=('aed170a470091cf718ab41611738f92af9549d4fe705debc0d97252a6bd0d984'
+            '877e2f8048f0fc6f976e9ab6cf09bde81a20f8917d20214b29141290c23867e0'
+            '1a524faabc9e17e43104e8f55dc0a168658c793ef4e1d5f9010dd6247b3b7298'
+            '1ab407f1c3e73a3713819ec877318d3e2f8ec30e992236121a2a015d4d0999d6')
+
+package() {
+	# -- Configs
+	install -Dm 0644 "udev.yubikey.rules"     "$pkgdir/lib/udev/rules.d/91-yubikey.rules"
+	install -Dm 0644 "pam.sudo"               "$pkgdir/usr/share/aeryxium/yubikey/sudo"
+	install -Dm 0644 "pam.system-local-login" "$pkgdir/usr/share/aeryxium/yubikey/system-local-login"
+	install -Dm 0644 "ykfde.conf"             "$pkgdir/usr/share/aeryxium/yubikey/ykfde.conf"
+
+	# -- Misc
+	install -Dm 0644 "yubikey.motd"           "$pkgdir/usr/share/aeryxium/yubikey/motd"
+}

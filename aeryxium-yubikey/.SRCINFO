@@ -1,0 +1,24 @@
+pkgbase = aeryxium-yubikey
+	pkgdesc = Yubikey packages for Aeryxium installations
+	pkgver = 1
+	pkgrel = 1
+	url = https://github.com/aeryxium/aeryxium-arch
+	install = aeryxium-yubikey.install
+	arch = x86_64
+	license = GPL
+	depends = yubico-pam
+	depends = yubikey-full-disk-encryption
+	depends = yubikey-manager
+	depends = yubikey-personalization
+	optdepends = aeryxium-ykfde: full-disk encryption with yubikey
+	backup = lib/udev/rules.d/91-yubikey.rules
+	source = pam.sudo
+	source = pam.system-local-login
+	source = udev.yubikey.rules
+	source = yubikey.motd
+	sha256sums = aed170a470091cf718ab41611738f92af9549d4fe705debc0d97252a6bd0d984
+	sha256sums = 877e2f8048f0fc6f976e9ab6cf09bde81a20f8917d20214b29141290c23867e0
+	sha256sums = 1a524faabc9e17e43104e8f55dc0a168658c793ef4e1d5f9010dd6247b3b7298
+	sha256sums = 1ab407f1c3e73a3713819ec877318d3e2f8ec30e992236121a2a015d4d0999d6
+
+pkgname = aeryxium-yubikey
