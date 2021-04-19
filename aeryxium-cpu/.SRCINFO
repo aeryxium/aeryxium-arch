@@ -1,0 +1,19 @@
+pkgbase = aeryxium-cpu
+	pkgdesc = CPU microcode for Aeryxium installations.
+	pkgver = 1
+	pkgrel = 1
+	url = https://github.com/aeryxium/aeryxium-arch
+	arch = x86_64
+	license = GPL
+
+pkgname = aeryxium-amdcpu
+	pkgdesc = AMD CPU microcode for Aeryxium installations.
+	depends = amd-ucode
+	provides = aeryxium-cpu
+	conflicts = aeryxium-intelcpu
+
+pkgname = aeryxium-intelcpu
+	pkgdesc = Intel CPU microcode for Aeryxium installations.
+	depends = intel-ucode
+	provides = aeryxium-cpu
+	conflicts = aeryxium-amdcpu
