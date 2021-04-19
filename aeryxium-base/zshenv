@@ -1,0 +1,5 @@
+# /etc/zsh/zshenv
+#
+# Global ZSH environment variables
+
+ZDOTDIR=$HOME/.config/zsh/

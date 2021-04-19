@@ -1,0 +1,120 @@
+#!/hint/bash
+
+# Variable defintions
+__aeryxium_base-variables() {
+	readonly confdir="/usr/share/aeryxium/base"
+	readonly configs=(
+		"/etc/issue"
+		"/etc/motd"
+		"/etc/pacman.conf"
+		"/etc/makepkg.conf"
+		"/etc/ssh/sshd_config"
+		"/etc/sudoers"
+		"/etc/xdg/reflector/reflector.conf"
+		"/etc/pam.d/login"
+	)
+}
+
+# Called on first install only
+post_install() {
+	# Define variables
+	__aeryxium_base-configs
+	local -r username="aeryxium"
+	local -r locales=(
+		"en_CA.UTF-8"
+		"en_US.UTF-8"
+	)
+
+	# Create user and set default passwords then expire them
+	# Generate hash with:
+	#     openssl passwd -6 -salt $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1) 'password'
+	useradd -m -G wheel -s /usr/bin/zsh "${username}"
+	echo        "root":'$6$ziP8eUs92BUshryj$mdmTZwbsWC8kJ.m9fEnOk7mpGAr3go1bDkXaz1q2DEItWD2wgf1bI.ywr1ebW13IGiaMNARWpwtsD6KEq3LzQ0' | chpasswd -e
+	echo "${username}":'$6$bgnm2fr3aSQ9y0xq$.suejeNd0CP6WFaI.5nCa8nVANwWiDloqB4tWolL0rug5x5UjwAwN7Hj9BGFJ3KmkYoDiBz36mVflmDjiT9n.1' | chpasswd -e
+	passwd -e root
+	passwd -e "${username}"
+
+	# Set timezone and generate locales
+	ln -sf /usr/share/zoneinfo/America/Toronto /etc/localtime
+	for locale in "${locales[@]}"; do
+		sed -i "s/^#${locale}/${locale}/" /etc/locale.gen
+	done
+	locale-gen
+
+	# Link systemd stub-resolver
+	ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+	local snap_confs=()
+	local -r template="/etc/snapper/config-templates/aeryxium"
+	# Configure root for snapper if root is a btrfs subvolumes
+	if findmnt -nlt btrfs | grep -q "^/\s"; then
+		cp "${template}" /etc/snapper/configs/root
+		sed -i 's/subvol/\//' /etc/snapper/configs/root
+		snap_confs+=( "root" )
+	fi
+	# Configure home for snapper if home is a btrfs subvolumes
+	if findmnt -nlt btrfs | grep -q "^/home\s"; then
+		cp "${template}" /etc/snapper/configs/home
+		sed -i 's/^subvol/\/home/' /etc/snapper/configs/home
+		snap_confs+=( "home" )
+	fi
+	sed -i '/SNAPPER_CONFIGS/d' /etc/conf.d/snapper
+	echo "SNAPPER_CONFIGS=\"${snap_confs[*]}\"" >> /etc/conf.d/snapper
+
+	# Enable snapper timers if snapper is configured
+	if [[ -n "${snap_confs:-}" ]]; then
+		systemctl enable snapper-boot.timer     >/dev/null
+		systemctl enable snapper-timeline.timer >/dev/null
+		systemctl enable snapper-cleanup.timer  >/dev/null
+	fi
+
+	# Enable services
+	systemctl enable sshd.service                >/dev/null
+	systemctl enable systemd-networkd.service    >/dev/null
+	systemctl enable systemd-resolved.service    >/dev/null
+	systemctl enable systemd-timesyncd.service   >/dev/null
+	systemctl enable reflector.timer             >/dev/null
+	systemctl --user enable --global tgr.service >/dev/null
+}
+
+# Called on every upgrade
+post_upgrade() {
+	# Define variables
+	__aeryxium_base-configs
+}
+
+# Install config files
+__aeryxium_base-configs() {
+	__aeryxium_base-variables
+
+	# Verify variables are correct
+	if [[ ! -d "${confdir:-}" ]] || (( ${#configs[@]} < 1 )); then
+		printf "ERROR: Configuration directory not configured.\n" >&2
+		return 1
+	fi
+
+	# Executed on first install
+	if [[ "${FUNCNAME[1]}" == "post_install" ]]; then
+		for config in "${configs[@]}"; do
+			if [[ ! -f "${config}" ]] ||
+					[[ ! -f "${confdir}/${config##*/}" ]]; then
+				printf "ERROR: Configuration for '%s' is incorrect.\n" \
+					"${config}" >&2
+				continue
+			fi
+			install -Dm 0644 "${config}" "${confdir}/backup/${config##*/}"
+			install -Dm 0644 "${confdir}/${config##*/}" "${config}"
+		done
+		if [[ -f "${confdir}/motd" ]]; then
+			cat "${confdir}/motd" > /etc/motd
+		fi
+		return 0
+	fi
+
+	# Executed if not first install
+	for config in "${configs[@]}"; do
+		if diff -q "${confdir}/${config##*/}" "${config}" >/dev/null; then
+			cp "${confdir}/${config##*/}" "${config}.pacnew"
+		fi
+	done
+}

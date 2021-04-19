@@ -1,0 +1,142 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgname='aeryxium-base'
+pkgver=1
+pkgrel=1
+pkgdesc='Minimal package set to define a basic Aeryxium installation'
+arch=('x86_64')
+url='https://github.com/aeryxium/aeryxium-arch'
+license=('GPL')
+depends=(
+	# -- Official Packages
+	# real base
+	'base'
+
+	# shell and related
+	'bash' 'bash-completion'
+	'zsh'  'zsh-completions'
+
+	# documentation
+	'man-db' 'man-pages'
+
+	# filesystem support
+	'btrfs-progs'
+	'cifs-utils'
+	'dosfstools'
+	'e2fsprogs'
+	'exfat-utils'
+
+	# text editing
+	'ed'
+	'vi'
+	'neovim'
+	'python-pynvim'
+
+	# networking
+	'inetutils'
+	'openssh'
+
+	# terminfo
+	'kitty-terminfo'
+
+	# other utilities
+	'git'
+	'reflector'
+	'snapper'
+	'sudo'
+	'tmux'
+	'tree'
+
+	# -- AUR Packages
+	'advcp'
+	'tgr'
+)
+install="$pkgname.install"
+source=(
+	# -- Scripts
+	'get_dots.zsh'
+
+	# -- Configs
+	# console
+	'aeryxium.map.gz'
+
+	# locale
+	'locale.conf'
+
+	# networking
+	'wired.network'
+	'wireless.network'
+
+	# openssh
+	'sshd_config'
+
+	# pacman
+	'makepkg.conf'
+	'pacman.conf'
+	'paccache.hook'
+	'pacnew.hook'
+	'reflector.conf'
+
+	# PAM
+	'login'
+
+	# snapper
+	'snapper.aeryxium'
+
+	# sudo
+	'sudoers'
+
+	# zsh
+	'zshenv'
+	'zshrc'
+
+	# -- Misc
+	'issue'
+	'motd'
+)
+sha256sums=('4f6f8b9fcd8c95e390c322da1d38b56b31d9203cc9b63939351e35b33b506f76'
+            '27c92e6122769b1bd74a80cbf6f1f039bf417448ed61c6694b8068bc5f9e1921'
+            'bb685f18a56d421ca379a70c665eb862c44db5806c5be455afc63162e83e0eff'
+            '96f60799b918865b7fd16cfeee2152402ca1ff6a1f2d1400ce23260d0bf31f2f'
+            '76b0a44ffb257f5f099d60baa502553fb6b255f31609f0afc21193354c26f6dd'
+            '3f61cf46b930968d6ced0b292a7d485d03806debee0c1088b4a8a762aa7f42ec'
+            '9c465cd4531d04d7eac5e2ebd7dabf949a81b0e378f4dff4053d02a3aa975578'
+            'c76b355938f1a6ff897a8d922d0a740d1a2519dc7e944b93bafdc2a1d16052b1'
+            '295c5c5f7aca4e0992fdc2e7ac82d00e1eeab0ef4b4f226c5c21205aae3d7211'
+            'f66a7fb8ea68098644dc6a546a862d3c540f0aa1935fc0ed270b0dac6b59a9f7'
+            '05a4cf52c9198c12ea64b9ce6a2008afbcbe3639ac8b5ecf5df426d5d524b6d7'
+            'c65e6c79066f5aed8c1065760e230a8e9bece8ccf8569c644d37e74436e9aa1e'
+            '87c12a7129f6660d8af88e41358a488ca76aa8ce7669e3265a6a8d455ae30f3e'
+            '47a5a6f98bc79e4f6cdf2ccf52c3ef16ed31cf68eb9a720bd97be775df9e2b1c'
+            '497adb8cc364ee1c6a1f16ff6c48dc8e59716fcfc0b54c9a9e21a6b62020a918'
+            'ce99571a201a80f828fc9b1066a266db6f0c4111de9d4072789ba9269b84aee9'
+            '0b5d2315af2594c45962fdbf07d9d4841d52522b942e02c45a2c841e5d1e3176'
+            'e95ed59c213a253c3fd49552b1aa585640d5228d09d3dc4fbf29a117155ccdf2')
+
+package() {
+	# -- Directories
+	install -dm 0750 "$pkgdir/etc/sudoers.d"
+
+	# -- Scripts
+	install -Dm 0775 "get_dots.zsh"     "$pkgdir/etc/skel/get_dots.zsh"
+
+	# -- Configs
+	install -Dm 0644 "aeryxium.map.gz"  "$pkgdir/usr/share/kbd/keymaps/aeryxium.map.gz"
+	install -Dm 0644 "locale.conf"      "$pkgdir/etc/locale.conf"
+	install -Dm 0644 "wired.network"    "$pkgdir/etc/systemd/network/90-wired.network"
+	install -Dm 0644 "wireless.network" "$pkgdir/etc/systemd/network/95-wireless.network"
+	install -Dm 0400 "sshd_config"      "$pkgdir/usr/share/aeryxium/base/sshd_config"
+	install -Dm 0644 "makepkg.conf"     "$pkgdir/usr/share/aeryxium/base/makepkg.conf"
+	install -Dm 0644 "pacman.conf"      "$pkgdir/usr/share/aeryxium/base/pacman.conf"
+	install -Dm 0644 "paccache.hook"    "$pkgdir/etc/pacman.d/hooks/paccache.hook"
+	install -Dm 0644 "pacnew.hook"      "$pkgdir/etc/pacman.d/hooks/pacnew.hook"
+	install -Dm 0644 "reflector.conf"   "$pkgdir/usr/share/aeryxium/base/reflector.conf"
+	install -Dm 0644 "login"            "$pkgdir/usr/share/aeryxium/base/login"
+	install -Dm 0644 "snapper.aeryxium" "$pkgdir/etc/snapper/config-templates/aeryxium"
+	install -Dm 0400 "sudoers"          "$pkgdir/etc/share/aeryxium/base/sudoers"
+	install -Dm 0644 "zshenv"           "$pkgdir/etc/zsh/zshenv"
+	install -Dm 0644 "zshrc"            "$pkgdir/etc/zsh/zshrc"
+
+	# -- Misc
+	install -Dm 0644 "issue"            "$pkgdir/usr/share/aeryxium/base/issue"
+	install -Dm 0644 "motd"             "$pkgdir/usr/share/aeryxium/base/motd"
+}

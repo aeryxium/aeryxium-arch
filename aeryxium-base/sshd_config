@@ -1,0 +1,28 @@
+# /etc/ssh/sshd_config
+#
+# Configuration file for ssh daemon.
+
+# Authentication options
+PermitRootLogin        no
+PasswordAuthentication no
+PermitEmptyPasswords   no
+
+# Setup crypto requirements
+KexAlgorithms     diffie-hellman-group-exchange-sha256
+Ciphers           aes256-ctr
+HostKeyAlgorithms ssh-rsa
+MACs              hmac-sha2-256,hmac-sha2-512
+
+# Establish key file location
+AuthorizedKeysFile .config/ssh/authorized_keys
+
+# Configure PAM options
+ChallengeResponseAuthentication yes
+UsePAM                          yes
+PrintMotd                       no
+
+# Enable sftp and scp
+Subsystem sftp /usr/lib/ssh/sftp-server
+
+# Establish authentication methods
+AuthenticationMethods publickey
