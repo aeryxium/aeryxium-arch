@@ -1,0 +1,25 @@
+#!/hint/bash
+
+# Called on first install only
+post_install() {
+	# Setup custom chroot build script
+	install -Dm 0644 "/etc/pacman.conf" "/usr/share/devtools/pacman-aeryxium.conf"
+	ln -sfr /usr/bin/archbuild /usr/local/bin/aeryxium-x86_64-build
+
+	# Setup local repo if it doesn't already exist
+	[[ ! -f /var/cache/pacman/localrepo/localrepo.db.tar.zst ]] && \
+		install -d /var/cache/pacman/localrepo              && \
+		repo-add /var/cache/pacman/localrepo/localrepo.db.tar.zst
+	chown -R 1000:1000 /var/cache/pacman/localrepo
+
+	# Add localrepo to pacman.conf if it doesn't exist
+	if ! grep -q '[[]localrepo[]]' /etc/pacman.conf; then
+		printf "\n%s\n%s\n" \
+			"[localrepo]" \
+			"Server = file:///var/cache/pacman/localrepo"
+	fi
+
+	# Enable any services that need no further configuration
+	systemctl enable paccache.timer
+	systemctl enable repoclean.timer
+}
