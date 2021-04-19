@@ -1,0 +1,15 @@
+# /etc/pacman.d/hooks/pacnew.hook
+#
+# Checks for pacnew files and outputs any that are found.
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Checking for .pacnew files...
+Exec = /usr/bin/pacdiff -o -f
+When = PostTransaction

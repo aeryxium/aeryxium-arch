@@ -1,0 +1,17 @@
+# /etc/zsh/zshrc
+#
+# Global ZSH RCS.
+
+# If user hasn't downloaded dotfiles yet, try and get them now
+if [[ -f "${HOME}"/get_dots.zsh ]]; then
+	TRAPUSR1() {
+		if [[ -o INTERACTIVE ]]; then
+			exec "${SHELL}"
+		fi
+	}
+	if "${HOME}"/get_dots.zsh; then
+		rm "${HOME}"/get_dots.zsh
+		ln -srt "${HOME}"/.config/zsh/zmodules-enabled "${HOME}"/.config/zsh/zmodules-available/*
+		killall -u "${USER}" -USR1 zsh
+	fi
+fi

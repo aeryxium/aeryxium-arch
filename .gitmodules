@@ -1,0 +1,6 @@
+[submodule "aur-submodules/base/tgr"]
+	path = aur-submodules/base/tgr
+	url = https://aur.archlinux.org/tgr.git
+[submodule "aur-submodules/base/advcp"]
+	path = aur-submodules/base/advcp
+	url = https://aur.archlinux.org/advcp.git

@@ -1,0 +1,14 @@
+# /etc/systemd/network/90-wired.network
+#
+# Wired network configuration for systemd.networkd
+
+[Match]
+Name=e*
+
+[Network]
+DHCP=ipv4
+DNSSEC=false
+
+[DHCP]
+RouteMetric=10
+UseDomains=true

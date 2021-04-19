@@ -1,0 +1,40 @@
+# /etc/sudoers
+#
+# Aeryxium sudoers file.
+
+# -- Host Aliases
+Host_Alias SERVERS      = valhalla, folkvangr, himinbjorg, alfheim
+Host_Alias WORKSTATIONS = bilskirnir, midgard
+Host_Alias TESTING      = muspelheim
+
+# -- User Aliases
+User_Alias ADMINS = odin, thor, aeryxium
+
+# -- Command Aliases
+Cmnd_Alias POWER    = /usr/bin/reboot, /usr/bin/poweroff
+Cmnd_Alias PKGMAN   = /usr/bin/pacman
+Cmnd_Alias SYSTEMD  = /usr/bin/journalctl, /usr/bin/systemctl
+Cmnd_Alias BACKUP   = /usr/bin/borg, /usr/bin/snapper
+Cmnd_Alias NETWORK  = /usr/bin/ip, /usr/bin/iptables, /usr/bin/ip6tables
+Cmnd_Alias FILEMGMT = /usr/bin/ls, /usr/bin/cp, /usr/bin/mv
+Cmnd_Alias ELEVATE  = /usr/bin/sudoedit, /usr/sbin/su
+
+# -- Default Options
+Defaults        env_keep   += "EDITOR HOME"
+Defaults        secure_path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Defaults:ADMINS lecture     = "never"
+
+# -- Sudoedit Options
+Defaults sudoedit_follow
+Defaults !sudoedit_checkdir
+
+# -- Specifications
+ADMINS   ALL          = (root) NETWORK, FILEMGMT, ELEVATE
+ADMINS   ALL          = (root) NOPASSWD: POWER, PKGMAN, SYSTEMD
+ADMINS   SERVERS      = (root) BACKUP
+aeryxium ALL          = (root) NOPASSWD: /usr/bin/tor, /usr/bin/killall -HUP tor
+aeryxium WORKSTATIONS = (root) NOPASSWD: /usr/bin/prime-switch
+root     ALL          = (ALL)  ALL
+
+# -- Read drop-in files from /etc/sudoers.d
+@includedir /etc/sudoers.d

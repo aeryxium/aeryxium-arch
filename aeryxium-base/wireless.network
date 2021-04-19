@@ -1,0 +1,14 @@
+# /etc/systemd/network/95-wireless.network
+#
+# Wireless network configuration for systemd.networkd
+
+[Match]
+Name=w*
+
+[Network]
+DHCP=ipv4
+DNSSEC=false
+
+[DHCP]
+RouteMetric=20
+UseDomains=true

@@ -1,0 +1,15 @@
+# /etc/pacman.d/hooks/paccache.hook
+#
+# Cleans package cache, keeping only the newest 3 versions.
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Removing old packages from pacman cache...
+Exec = /usr/bin/paccache -rk3
+When = PostTransaction
