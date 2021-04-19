@@ -1,0 +1,62 @@
+pkgbase = aeryxium-gpu
+	pkgdesc = Drivers and utilities for video hardware acceleration on Aeryxium installations
+	pkgver = 1
+	pkgrel = 1
+	url = https://github.com/aeryxium/aeryxium-arch
+	arch = x86_64
+	license = GPL
+
+pkgname = aeryxium-amdgpu
+	pkgdesc = AMD GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = xf86-video-amdgpu
+	depends = mesa
+	depends = vdpauinfo
+	depends = libva-utils
+	depends = libva-mesa-driver
+	depends = mesa-vdpau
+	depends = amdvlk
+	depends = vulkan-radeon
+	provides = aeryxium-gpu
+
+pkgname = aeryxium-lib32-amdgpu
+	pkgdesc = 32-bit AMD GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = aeryxium-amdgpu
+	depends = lib32-mesa
+	depends = lib32-libva-mesa-driver
+	depends = lib32-mesa-vdpau
+	depends = lib32-amdvlk
+	depends = lib32-vulkan-radeon
+	provides = aeryxium-lib32-gpu
+
+pkgname = aeryxium-intelgpu
+	pkgdesc = Intel GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = mesa
+	depends = xf86-video-intel
+	depends = vdpauinfo
+	depends = libva-utils
+	depends = intel-media-driver
+	depends = mesa-vdpau
+	depends = vulkan-intel
+	provides = aeryxium-gpu
+
+pkgname = aeryxium-lib32-intelgpu
+	pkgdesc = Intel GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = aeryxium-intelgpu
+	depends = lib32-mesa
+	depends = lib32-mesa-vdpau
+	depends = lib32-vulkan-intel
+	provides = aeryxium-lib32-gpu
+
+pkgname = aeryxium-nvidiagpu
+	pkgdesc = Nvidia GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = nvidia-dkms
+	depends = nvidia-utils
+	depends = vdpauinfo
+	depends = libva-utils
+	provides = aeryxium-gpu
+
+pkgname = aeryxium-lib32-nvidiagpu
+	pkgdesc = 32-bit Nvidia GPU drivers and hardware acceleration utilities for Aeryxium installations
+	depends = aeryxium-nvidiagpu
+	depends = lib32-nvidia-utils
+	provides = aeryxium-gpu

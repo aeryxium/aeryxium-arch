@@ -1,0 +1,98 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgbase='aeryxium-gpu'
+pkgname=(
+	'aeryxium-amdgpu'
+	'aeryxium-lib32-amdgpu'
+	'aeryxium-intelgpu'
+	'aeryxium-lib32-intelgpu'
+	'aeryxium-nvidiagpu'
+	'aeryxium-lib32-nvidiagpu'
+)
+pkgver=1
+pkgrel=1
+pkgdesc='Drivers and utilities for video hardware acceleration on Aeryxium installations'
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+
+package_aeryxium-amdgpu() {
+	pkgdesc='AMD GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		'xf86-video-amdgpu'
+		'mesa'
+		'vdpauinfo'
+		'libva-utils'
+		'libva-mesa-driver'
+		'mesa-vdpau'
+		'amdvlk'
+		'vulkan-radeon'
+	)
+	provides=('aeryxium-gpu')
+}
+
+package_aeryxium-lib32-amdgpu() {
+	pkgdesc='32-bit AMD GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		# -- Aeryxium Packages
+		'aeryxium-amdgpu'
+
+		# -- Official Packages
+		'lib32-mesa'
+		'lib32-libva-mesa-driver'
+		'lib32-mesa-vdpau'
+		'lib32-amdvlk'
+		'lib32-vulkan-radeon'
+	)
+	provides=('aeryxium-lib32-gpu')
+}
+
+package_aeryxium-intelgpu() {
+	pkgdesc='Intel GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		'mesa'
+		'xf86-video-intel'
+		'vdpauinfo'
+		'libva-utils'
+		'intel-media-driver'
+		'mesa-vdpau'
+		'vulkan-intel'
+	)
+	provides=('aeryxium-gpu')
+}
+
+package_aeryxium-lib32-intelgpu() {
+	pkgdesc='Intel GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		# -- Aeryxium Packages
+		'aeryxium-intelgpu'
+
+		# -- Official Packages
+		'lib32-mesa'
+		'lib32-mesa-vdpau'
+		'lib32-vulkan-intel'
+	)
+	provides=('aeryxium-lib32-gpu')
+}
+
+package_aeryxium-nvidiagpu() {
+	pkgdesc='Nvidia GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		'nvidia-dkms'
+		'nvidia-utils'
+		'vdpauinfo'
+		'libva-utils'
+	)
+	provides=('aeryxium-gpu')
+}
+
+package_aeryxium-lib32-nvidiagpu() {
+	pkgdesc='32-bit Nvidia GPU drivers and hardware acceleration utilities for Aeryxium installations'
+	depends=(
+		# -- Aeryxium Packages
+		'aeryxium-nvidiagpu'
+
+		# -- Official Packages
+		'lib32-nvidia-utils'
+	)
+	provides=('aeryxium-gpu')
+}
