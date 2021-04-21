@@ -1,0 +1,68 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgname='aeryxium-devel'
+pkgver=1
+pkgrel=1
+pkgdesc="A collection of packages essential for basic development"
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+depends=(
+	# -- Official Packages
+	# base-devel from 21 Apr 2021
+	'autoconf'
+	'automake'
+	'binutils'
+	'bison'
+	'fakeroot'
+	'file'
+	'findutils'
+	'flex'
+	'gawk'
+	'gcc'
+	'gettext'
+	'grep'
+	'groff'
+	'gzip'
+	'libtool'
+	'm4'
+	'make'
+	'pacman'
+	'patch'
+	'pkgconf'
+	'sed'
+	'sudo'
+	'texinfo'
+	'which'
+
+	# additional packages
+	'devtools'
+	'pacman-contrib'
+
+	# -- AUR Packages
+	'aurutils'
+	'repoctl'
+)
+backup=(
+	"etc/repoctl.conf"
+)
+install="$pkgname.install"
+source=(
+	# -- Configs
+	'repoctl.conf'
+
+	# -- Units
+	'repoclean.service'
+	'repoclean.timer'
+)
+sha256sums=('6c6ffcf03e4e0d2160f009a7d91997568e58e17765ecd9100130e9c79e1d1df2'
+            'b68bd4a5a046491b87e75cde66e817d5cebcbf107cb1c71323f6b4752d3dbff4'
+            '39164f8e400e1614e3022fcc8979f96547377d94493965e43315e5eba99ceef9')
+
+package() {
+	# -- Configs
+	install -Dm 0644 "repoctl.conf"      "$pkgdir/etc/repoctl.conf"
+
+	# -- Units
+	install -Dm 0644 "repoclean.service" "$pkgdir/usr/lib/systemd/system/repoclean.service"
+	install -Dm 0644 "repoclean.timer"   "$pkgdir/usr/lib/systemd/system/repoclean.timer"
+}

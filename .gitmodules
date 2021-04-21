@@ -1,0 +1,6 @@
+[submodule "aur-submodules/devel/aurutils"]
+	path = aur-submodules/devel/aurutils
+	url = https://aur.archlinux.org/aurutils.git
+[submodule "aur-submodules/devel/repoctl"]
+	path = aur-submodules/devel/repoctl
+	url = https://aur.archlinux.org/repoctl.git

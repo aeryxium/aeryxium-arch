@@ -1,0 +1,12 @@
+# /usr/lib/systemd/system/repoclean.timer
+#
+# Timer for cleaning aeryxium repo.
+
+[Unit]
+Description=Timer for cleaning local repo.
+
+[Timer]
+OnCalendar=Weekly
+
+[Install]
+WantedBy=timers.target

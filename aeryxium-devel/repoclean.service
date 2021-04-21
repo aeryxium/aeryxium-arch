@@ -1,0 +1,11 @@
+# usr/lib/systemd/system/repoclean.service
+#
+# Clean local repo of old packages.
+
+[Unit]
+Description=Clean local repo of old packages.
+
+[Service]
+Type=oneshot
+Environment=REPOCTL_CONFIG=/etc/repoctl.conf
+ExecStart=/usr/bin/repoctl update
