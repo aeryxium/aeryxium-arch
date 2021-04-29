@@ -1,0 +1,33 @@
+# Maintainer: Aeryxium <aeryxium+arch@gmail.com>
+pkgbase='aeryxium-cpu'
+pkgname=(
+	'aeryxium-amdcpu'
+	'aeryxium-intelcpu'
+)
+pkgver=1
+pkgrel=1
+pkgdesc='CPU microcode for Aeryxium installations.'
+arch=('x86_64')
+url="https://github.com/aeryxium/aeryxium-arch"
+license=('GPL')
+
+package_aeryxium-amdcpu() {
+	pkgdesc='AMD CPU microcode for Aeryxium installations.'
+	depends=(
+		# -- Official Packages
+		'amd-ucode'
+	)
+	provides=('aeryxium-cpu')
+	conflicts=('aeryxium-intelcpu')
+}
+
+package_aeryxium-intelcpu() {
+	pkgdesc='Intel CPU microcode for Aeryxium installations.'
+	depends=(
+		# -- Official Packages
+		'intel-ucode'
+	)
+	provides=('aeryxium-cpu')
+	conflicts=('aeryxium-amdcpu')
+}
+
