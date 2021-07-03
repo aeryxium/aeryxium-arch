@@ -1,0 +1,32 @@
+install_configs() {
+	local -r confdir="/usr/share/aeryxium/yubikey"
+	local -r configs=(
+		"/etc/pam.d/sudo"
+		"/etc/pam.d/system-local-login"
+	)
+	for config in "${configs[@]}"; do
+		install -Dm 0644 "${config}" "${confdir}/backup/${config##*/}"
+		# If installing package, overwrite existing files
+		if [[ "${FUNCNAME[1]}" == "post_install" ]]; then
+			install -Dm 0644 "${confdir}/${config##*/}" "${config}"
+		# If upgrading package, create pacnews if configs differ
+		elif diff -q "${confdir}/${config##*/}" "${config}" >/dev/null; then
+			cp "${confdir}/${config##*/}" "${config}.pacnew"
+		fi
+	done
+
+	# Update MOTD if required
+	if grep -q "$(head -n1 "${confdir}/motd")" "$pkgdir/etc/motd"; then
+		cat "${confdir}/motd" >> /etc/motd
+	fi
+}
+
+post_install() {
+	# Backup and install configuration files
+	install_configs
+}
+
+post_upgrade() {
+	# Backup and install configuration files
+	install_configs
+}
